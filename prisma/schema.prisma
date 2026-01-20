@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  password      String?
+  role          String    @default("STUDENT") // STUDENT, ADMIN
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  profile       Profile?
+  activityLogs  ActivityLog[]
+}
+
+model Profile {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  university    String?
+  grade         String?
+  motivation    String?   @db.Text
+  availableHours String?
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Program {
+  id            String    @id @default(cuid())
+  title         String
+  description   String?   @db.Text
+  status        String    // OPEN, CLOSED, ARCHIVED
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model ActivityLog {
+  id            String    @id @default(cuid())
+  userId        String
+  programId     String?
+  content       String?   @db.Text
+  hours         Float?
+  date          DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
